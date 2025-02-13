@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code & Bounce Effect</title>
+    <style>
+        body {
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        canvas {
+            background: transparent;
+            filter: blur(0px);
+            transition: filter 0.3s;
+        }
+
+        @keyframes glow {
+            0% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.7)); }
+            50% { filter: drop-shadow(0 0 20px rgba(255,255,255,0.9)); }
+            100% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.7)); }
+        }
+
+        .start-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            perspective: 1000px;
+        }
+
+        #startButton {
+            padding: 20px 40px;
+            font-size: 24px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid white;
+            border-radius: 15px;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #startButton::before {
+            content: '';
+            position: absolute;
+            top: var(--y, 50%);
+            left: var(--x, 50%);
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            transition: width 0.5s ease, height 0.5s ease;
+        }
+
+        #startButton:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255,255,255,0.3);
+        }
+
+        #startButton:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .glow-text {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: white;
+            text-shadow: 0 0 10px rgba(255,255,255,0.7);
+            opacity: 0;
+            animation: fadeIn 2s ease forwards;
+            text-align: center;
+            width: 100%;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -40%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="glow-text">Bounce & Music</div>
+    <div class="start-container">
+        <button id="startButton">시작하기</button>
+    </div>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <audio id="bounceSound" src="buttercup.mp3" loop></audio>
+
+    <script>
+        const startButton = document.getElementById('startButton');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext("2d");
+
+        const SIZE = 400;
+        canvas.width = SIZE;
+        canvas.height = SIZE;
+
+        const centerX = SIZE / 2;
+        const centerY = SIZE / 2;
+        const radius = SIZE / 2 - 10;
+
+        let ball = {
+            x: centerX,
+            y: centerY - 50,
+            radius: 25,
+            dx: (Math.random() * 2 - 1), 
+            dy: -3,
+            gravity: 0.07, 
+            growthRate: 0.03, 
+            color: "red",
+            bounceFactor: 1,
+            lastBounceTime: 0,
+            minBounceInterval: 500,  // 밀리초 단위로 설정 (예: 2초)
+            rainbowEffect: false,
+            glowIntensity: 0
+        };
+
+        const audio = document.getElementById("bounceSound");
+
+        // Particle 클래스 수정
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.radius = 2;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 5 + 2;
+                this.dx = Math.cos(angle) * speed;
+                this.dy = Math.sin(angle) * speed;
+                this.alpha = 1;
+                this.life = 1;
+            }
+
+            update() {
+                this.x += this.dx;
+                this.y += this.dy;
+                this.life -= 0.02;
+                this.alpha = this.life;
+                this.radius *= 0.99;
+            }
+
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // 파티클 배열 추가
+        let particles = [];
+
+        function drawCircle() {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 4;
+            if (ball.glowIntensity > 0) {
+                ctx.shadowColor = 'white';
+                ctx.shadowBlur = 15 * ball.glowIntensity;
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawBall() {
+            ctx.save();
+            if (ball.rainbowEffect) {
+                const gradient = ctx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, ball.radius);
+                const hue = (performance.now() / 20) % 360;
+                gradient.addColorStop(0, `hsl(${hue}, 100%, 70%)`);
+                gradient.addColorStop(0.5, `hsl(${(hue + 120) % 360}, 100%, 60%)`);
+                gradient.addColorStop(1, `hsl(${(hue + 240) % 360}, 100%, 50%)`);
+                ctx.fillStyle = gradient;
+            } else {
+                ctx.fillStyle = ball.color;
+            }
+            
+            if (ball.glowIntensity > 0) {
+                ctx.shadowColor = 'white';
+                ctx.shadowBlur = 20 * ball.glowIntensity;
+            }
+            
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function getRandomColor() {
+            return `hsl(${Math.random() * 360}, 100%, 50%)`;
+        }
+
+        // 폭죽 생성 함수 추가
+        function createExplosion(x, y, color) {
+            for (let i = 0; i < 20; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        // update 함수 수정 - 파티클 업데이트 추가
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawCircle();
+            drawBall();
+
+            // 파티클 업데이트 및 그리기
+            particles = particles.filter(particle => particle.life > 0);
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw(ctx);
+            });
+
+            ball.dy += ball.gravity;
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+            ball.radius += ball.growthRate; 
+
+            const distFromCenter = Math.sqrt((ball.x - centerX) ** 2 + (ball.y - centerY) ** 2);
+            if (distFromCenter + ball.radius >= radius) {
+                const normalX = (ball.x - centerX) / distFromCenter;
+                const normalY = (ball.y - centerY) / distFromCenter;
+                const dotProduct = ball.dx * normalX + ball.dy * normalY;
+
+                ball.dx -= 2 * dotProduct * normalX;
+                ball.dy -= 2 * dotProduct * normalY;
+
+                // 위치 보정
+                const overlap = (distFromCenter + ball.radius) - radius;
+                ball.x -= normalX * overlap;
+                ball.y -= normalY * overlap;
+
+                ball.dy *= ball.bounceFactor;
+                ball.dx *= ball.bounceFactor;
+                
+                // 노래 및 색상 변경 로직
+                const currentTime = performance.now();
+                const timeSinceLastBounce = currentTime - ball.lastBounceTime;
+                
+                if (audio.paused) {
+                    // 처음 재생하는 경우
+                    audio.play().catch(() => console.log("Audio play blocked"));
+                    ball.color = getRandomColor();  // 색상 변경
+                    createExplosion(ball.x, ball.y, ball.color);
+                } else if (timeSinceLastBounce > ball.minBounceInterval) {
+                    // 설정된 시간 간격이 지난 후 충돌한 경우 노래와 효과 초기화
+                    audio.currentTime = 0;
+                    ball.color = getRandomColor();
+                    createExplosion(ball.x, ball.y, ball.color);
+                    
+                    // 클릭 효과 초기화
+                    ball.rainbowEffect = false;
+                    ball.glowIntensity = 0;
+                    document.querySelector('canvas').style.animation = '';
+                }
+                
+                ball.lastBounceTime = currentTime;
+
+                // 최대 속도 제한
+                const maxSpeed = 10;
+                const speed = Math.sqrt(ball.dx ** 2 + ball.dy ** 2);
+                if (speed > maxSpeed) {
+                    const ratio = maxSpeed / speed;
+                    ball.dx *= ratio;
+                    ball.dy *= ratio;
+                }
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        // 시작 버튼 이벤트 리스너 수정
+        startButton.addEventListener('click', () => {
+            startButton.style.display = 'none';
+            canvas.style.display = 'block';
+            audio.play().then(() => {
+                console.log("오디오 재생 시작!");
+                update();
+            }).catch(error => {
+                console.error("오디오 재생 실패:", error);
+            });
+        });
+
+        // 클릭 이벤트 리스너 수정
+        document.addEventListener("click", (event) => {
+            if (event.target !== startButton && canvas.style.display !== 'none') {
+                if (audio.paused) {
+                    audio.play().catch(error => console.error("오디오 재생 실패:", error));
+                }
+                
+                // 화려한 효과 영구 적용
+                ball.rainbowEffect = true;
+                ball.glowIntensity = 1;
+                createExplosion(ball.x, ball.y, getRandomColor());
+                
+                // 원 글로우 효과 영구 적용
+                document.querySelector('canvas').style.animation = 'glow 1s infinite';
+            }
+        });
+
+        // 마우스 움직임 추적
+        document.addEventListener('mousemove', (e) => {
+            if (canvas.style.display === 'none') {
+                const button = document.getElementById('startButton');
+                const rect = button.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                button.style.setProperty('--x', `${x}px`);
+                button.style.setProperty('--y', `${y}px`);
+                
+                // 마우스와 버튼 사이의 거리에 따른 글로우 효과
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const distance = Math.sqrt(
+                    Math.pow(e.clientX - centerX, 2) + 
+                    Math.pow(e.clientY - centerY, 2)
+                );
+                
+                const maxDistance = 200;
+                const intensity = Math.max(0, 1 - distance / maxDistance);
+                button.style.boxShadow = `0 0 ${30 * intensity}px ${20 * intensity}px rgba(255,255,255,${0.3 * intensity})`;
+            }
+        });
+
+        audio.volume = 0.5;
+    </script>
+</body>
+</html>

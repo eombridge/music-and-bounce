@@ -1,4 +1,4 @@
-/circle.bounce/index.html -->
+index.html -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -8,12 +8,26 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div id="volumeNotice" class="volume-notice">
+        <div class="notice-content">
+            <div class="notice-icon">
+                <span class="volume-icon">🔊</span>
+            </div>
+            <p>더 나은 경험을 위해 볼륨을 올려주세요</p>
+            <span class="close-notice">×</span>
+        </div>
+    </div>
+
     <div class="glow-text">Circle Bounce</div>
     <div class="start-container">
         <button id="startButton">Get Starts</button>
     </div>
     <canvas id="canvas" style="display: none;"></canvas>
     <audio id="bounceSound" src="buttercup.mp3" loop></audio>
+
+    <footer class="copyright">
+        <p>Made by EOMBRIDGE © 2024. All rights reserved.</p>
+    </footer>
 
     <script src="particle.js"></script>
     <script src="ball.js"></script>

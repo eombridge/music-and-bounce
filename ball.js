@@ -1,17 +1,17 @@
 /* filepath: /c:/Users/eombr/OneDrive/Desktop/circle.bounce/ball.js */
-const SIZE = 400;
+const SIZE = Math.min(window.innerWidth, window.innerHeight) * 0.8; // 1.5에서 0.8로 수정
 const centerX = SIZE / 2;
 const centerY = SIZE / 2;
-const radius = SIZE / 2 - 10;
+const radius = SIZE / 2 - 30; // 여백 조정
 
 let ball = {
     x: centerX,
     y: centerY - 50,
-    radius: 25,
-    dx: (Math.random() * 2), 
+    radius: 45,  // 공의 초기 크기도 조정
+    dx: (Math.random() * 2 - 1),
     dy: -3,
-    gravity: 0.07, 
-    growthRate: 0.03, 
+    gravity: 0.08,
+    growthRate: 0.05,  // 성장 속도도 약간 감소
     color: "red",
     bounceFactor: 1,
     lastBounceTime: 0,

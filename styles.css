@@ -1,24 +1,24 @@
 body {
-    background: black;
     margin: 0;
     padding: 0;
     width: 100vw;
     height: 100vh;
+    background: black;
+    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: visible;  /* overflow를 visible로 변경 */
 }
 
 canvas {
-    background: transparent;
-    filter: blur(0px);
-    transition: filter 0.3s;
-    position: fixed;  /* absolute에서 fixed로 변경 */
+    position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1;      /* z-index 추가 */
+    transform: translate(-50%, -50%) scale(0.8); /* 캔버스를 약간 축소하여 여유 공간 확보 */
+    background: transparent;
+    z-index: 1;
+    filter: blur(0px);
+    transition: filter 0.3s;
     pointer-events: none;  /* 캔버스를 클릭 투과되게 설정 */
 }
 
@@ -76,4 +76,81 @@ canvas {
 @keyframes fadeIn {
     from { opacity: 0; transform: translate(-50%, -40%); }
     to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+.volume-notice {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    animation: slideDown 0.5s ease-out;
+}
+
+.notice-content {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    padding: 12px 25px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.notice-content p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.volume-icon {
+    font-size: 18px;
+    animation: pulse 2s infinite;
+}
+
+.close-notice {
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 24px;
+    font-weight: 300;
+    padding: 0 5px;
+    transition: all 0.3s ease;
+}
+
+.close-notice:hover {
+    color: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+}
+
+@keyframes slideDown {
+    from {
+        transform: translate(-50%, -100%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.copyright {
+    position: fixed;
+    bottom: 10px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    z-index: 1000;
 }

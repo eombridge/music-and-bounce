@@ -5,10 +5,13 @@ class Particle {
         this.y = y;
         this.color = color;
         this.radius = 2;
-        const angle = Math.random() * Math.PI * 2;
+        
+        // 공의 표면에서 바깥쪽으로 퍼지도록 방향 설정
+        const angle = Math.atan2(y - ball.y, x - ball.x);
         const speed = Math.random() * 5 + 2;
         this.dx = Math.cos(angle) * speed;
         this.dy = Math.sin(angle) * speed;
+        
         this.alpha = 1;
         this.life = 1;
     }

@@ -5,12 +5,44 @@ const startButton = document.getElementById('startButton');
 const audio = document.getElementById("bounceSound");
 let particles = [];
 
+// 볼륨 알림창 닫기 기능
+document.querySelector('.close-notice').addEventListener('click', function() {
+    document.getElementById('volumeNotice').style.display = 'none';
+});
+
+// 시작 버튼 클릭 시 알림창 자동 닫기 추가
+startButton.addEventListener('click', () => {
+    document.getElementById('volumeNotice').style.display = 'none';
+    startButton.style.display = 'none';
+    document.querySelector('.glow-text').style.display = 'none';
+    canvas.style.display = 'block';
+    audio.play().then(() => {
+        console.log("오디오 재생 시작!");
+        update();
+    }).catch(error => {
+        console.error("오디오 재생 실패:", error);
+    });
+});
+
+// 화면 크기 변경 시 캔버스 크기 조정
+window.addEventListener('resize', () => {
+    const newSize = Math.min(window.innerWidth, window.innerHeight) * 1.5;
+    canvas.width = newSize;
+    canvas.height = newSize;
+});
+
+// 초기 캔버스 크기 설정
 canvas.width = SIZE;
 canvas.height = SIZE;
 
 function createExplosion(x, y, color) {
-    for (let i = 0; i < 20; i++) {
-        particles.push(new Particle(x, y, color));
+    const particleCount = 20;
+    for (let i = 0; i < particleCount; i++) {
+        const angle = (i / particleCount) * Math.PI * 2;
+        // 공의 표면에서 파티클 시작
+        const startX = x + Math.cos(angle) * ball.radius;
+        const startY = y + Math.sin(angle) * ball.radius;
+        particles.push(new Particle(startX, startY, color));
     }
 }
 
@@ -76,18 +108,6 @@ function update() {
 
     requestAnimationFrame(update);
 }
-
-startButton.addEventListener('click', () => {
-    startButton.style.display = 'none';
-    document.querySelector('.glow-text').style.display = 'none';
-    canvas.style.display = 'block';
-    audio.play().then(() => {
-        console.log("오디오 재생 시작!");
-        update();
-    }).catch(error => {
-        console.error("오디오 재생 실패:", error);
-    });
-});
 
 // 클릭 이벤트 수정 - 이벤트 버블링 방지
 document.addEventListener("click", (event) => {

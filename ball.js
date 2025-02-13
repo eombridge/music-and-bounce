@@ -7,7 +7,7 @@ const radius = SIZE / 2 - 30; // 여백 조정
 let ball = {
     x: centerX,
     y: centerY - 50,
-    radius: 45,  // 공의 초기 크기도 조정
+    radius: 25,  // 공의 초기 크기도 조정
     dx: (Math.random() * 2 - 1),
     dy: -3,
     gravity: 0.08,

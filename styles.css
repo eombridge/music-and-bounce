@@ -7,17 +7,19 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
+    overflow: visible;  /* overflow를 visible로 변경 */
 }
 
 canvas {
     background: transparent;
     filter: blur(0px);
     transition: filter 0.3s;
-    position: absolute;
+    position: fixed;  /* absolute에서 fixed로 변경 */
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    z-index: 1;      /* z-index 추가 */
+    pointer-events: none;  /* 캔버스를 클릭 투과되게 설정 */
 }
 
 @keyframes glow {
@@ -31,7 +33,7 @@ canvas {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 1000;
+    z-index: 2;  /* 버튼이 캔버스 위에 보이도록 */
     perspective: 1000px;
     display: flex;
     justify-content: center;
@@ -68,6 +70,7 @@ canvas {
     animation: fadeIn 2s ease forwards;
     text-align: center;
     width: 100%;
+    z-index: 2;  /* 텍스트가 캔버스 위에 보이도록 */
 }
 
 @keyframes fadeIn {

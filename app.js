@@ -50,18 +50,17 @@ function update() {
         const currentTime = performance.now();
         const timeSinceLastBounce = currentTime - ball.lastBounceTime;
         
-        if (audio.paused) {
-            audio.play().catch(() => console.log("Audio play blocked"));
-            ball.color = getRandomColor();
-            createExplosion(ball.x, ball.y, ball.color);
-        } else if (timeSinceLastBounce > ball.minBounceInterval) {
-            audio.currentTime = 0;
-            ball.color = getRandomColor();
-            createExplosion(ball.x, ball.y, ball.color);
-            
-            ball.rainbowEffect = false;
-            ball.glowIntensity = 0;
-            canvas.style.animation = '';
+        // 클릭 이펙트가 활성화되어 있지 않을 때만 노래 초기화
+        if (!ball.rainbowEffect) {
+            if (audio.paused) {
+                audio.play().catch(() => console.log("Audio play blocked"));
+                ball.color = getRandomColor();
+                createExplosion(ball.x, ball.y, ball.color);
+            } else if (timeSinceLastBounce > ball.minBounceInterval) {
+                audio.currentTime = 0;
+                ball.color = getRandomColor();
+                createExplosion(ball.x, ball.y, ball.color);
+            }
         }
         
         ball.lastBounceTime = currentTime;
@@ -90,8 +89,12 @@ startButton.addEventListener('click', () => {
     });
 });
 
+// 클릭 이벤트 수정 - 이벤트 버블링 방지
 document.addEventListener("click", (event) => {
     if (event.target !== startButton && canvas.style.display !== 'none') {
+        event.preventDefault();
+        event.stopPropagation();
+        
         if (audio.paused) {
             audio.play().catch(error => console.error("오디오 재생 실패:", error));
         }
@@ -99,7 +102,6 @@ document.addEventListener("click", (event) => {
         ball.rainbowEffect = true;
         ball.glowIntensity = 1;
         createExplosion(ball.x, ball.y, getRandomColor());
-        
         canvas.style.animation = 'glow 1s infinite';
     }
 });

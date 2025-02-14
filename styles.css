@@ -8,6 +8,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    font-family: 'Arial', sans-serif;
 }
 
 canvas {
@@ -41,21 +42,20 @@ canvas {
 }
 
 #startButton {
-    padding: 15px 25px;
-    font-size: 13px;
+    padding: clamp(12px, 2vh, 20px) clamp(20px, 4vw, 40px);
+    font-size: clamp(14px, 1.5vw, 18px);
     cursor: pointer;
     background: white;
     border: none;
     border-radius: 15px;
-    color: black;
     text-transform: uppercase;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
     transition: all 0.3s ease;
 }
 
 #startButton:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 30px rgba(255,255,255,0.5);
+    box-shadow: 0 0 30px rgba(255,255,255,0.3);
 }
 
 .glow-text {
@@ -63,7 +63,7 @@ canvas {
     top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 48px;
+    font-size: clamp(32px, 6vw, 64px);
     color: white;
     text-shadow: 0 0 10px rgba(255,255,255,0.7);
     opacity: 0;
@@ -80,43 +80,47 @@ canvas {
 
 .volume-notice {
     position: fixed;
-    top: 30px;
+    top: clamp(20px, 5vh, 30px);
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
+    width: clamp(200px, 50vw, 400px);  /* 너비 감소 */
     animation: slideDown 0.5s ease-out;
 }
 
 .notice-content {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(8px);
-    padding: 12px 25px;
-    border-radius: 50px;
+    padding: clamp(8px, 1.5vh, 15px) clamp(15px, 2vw, 25px);  /* 패딩 감소 */
+    border-radius: 30px;  /* 라운드 감소 */
     display: flex;
     align-items: center;
-    gap: 15px;
+    justify-content: center;  /* 중앙 정렬 추가 */
+    gap: clamp(8px, 1.5vw, 15px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    text-align: center;  /* 텍스트 중앙 정렬 */
 }
 
 .notice-content p {
     color: rgba(255, 255, 255, 0.9);
-    font-size: 14px;
+    font-size: clamp(12px, 1.2vw, 16px);  /* 폰트 크기 감소 */
     font-weight: 500;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     margin: 0;
-    text-transform: uppercase;
+    white-space: nowrap;  /* 텍스트 줄바꿈 방지 */
+    text-transform: none;  /* 대문자 변환 제거 */
 }
 
 .volume-icon {
-    font-size: 18px;
+    font-size: clamp(16px, 1.5vw, 20px);  /* 아이콘 크기 감소 */
     animation: pulse 2s infinite;
 }
 
 .close-notice {
     cursor: pointer;
     color: rgba(255, 255, 255, 0.6);
-    font-size: 24px;
+    font-size: clamp(18px, 2vw, 24px);  /* X 버튼 크기 감소 */
     font-weight: 300;
     padding: 0 5px;
     transition: all 0.3s ease;
@@ -146,11 +150,40 @@ canvas {
 
 .copyright {
     position: fixed;
-    bottom: 10px;
+    bottom: clamp(10px, 3vh, 30px);
     left: 0;
     width: 100%;
     text-align: center;
     color: rgba(255, 255, 255, 0.5);
-    font-size: 12px;
+    font-size: clamp(12px, 1.2vw, 16px);
     z-index: 1000;
+}
+
+@media (max-width: 768px) {
+    .volume-notice {
+        width: 80vw;  /* 모바일에서 너비 감소 */
+    }
+
+    .notice-content {
+        padding: 8px 12px;
+        border-radius: 20px;
+    }
+
+    .glow-text {
+        width: 90vw;
+    }
+
+    .notice-content p {
+        font-size: 14px;  /* 모바일 폰트 크기 고정 */
+    }
+}
+
+@media (max-height: 600px) {
+    .volume-notice {
+        top: 10px;
+    }
+
+    .copyright {
+        bottom: 5px;
+    }
 }
